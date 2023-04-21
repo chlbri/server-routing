@@ -1,7 +1,7 @@
 {
   // see https://www.typescriptlang.org/tsconfig to better understand tsconfigs
   "include": ["src/**/*"],
-  "exclude": ["**/*.test.ts", "src/fixtures", "**/*.test-d.ts"],
+  "exclude": ["**/*.test.ts", "**/fixtures/**/*.ts", "**/*.test-d.ts"],
   "compilerOptions": {
     "lib": ["esnext"],
     "importHelpers": true,
