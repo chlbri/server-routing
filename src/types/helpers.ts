@@ -3,13 +3,20 @@ import type { Booleans, Objects, Pipe, Strings, Tuples } from 'hotscript';
 export type WithRoutes = {
   routes?: Record<string, RouteJSON>;
 };
+
+export type UnknownToUndefined<T> = unknown extends T ? undefined : T;
+
+export type U_U<T> = UnknownToUndefined<T>;
+
+export type EmptyObject = NonNullable<unknown>;
+
 export type Config = _RouteJSON & WithRoutes;
 
 export type RouteJSON = Config | string;
 
 export type IO = [any, any];
 
-type _RouteJSON = {
+export type _RouteJSON = {
   types?: IO;
   controller: string;
   middleware?: string;
@@ -25,19 +32,21 @@ type Reducer<T extends Config, R extends readonly string[]> = Pipe<
     ? T['routes'][R0] extends infer A
       ? A extends Config
         ? Reducer<A, Pipe<R, [Tuples.Drop<1>]>>
+        : A extends string
+        ? A
         : never
       : never
     : never
   : never;
 
 export type Flat<T extends Config> = {
-  [K in RoutesStrings<T>]: Reducer<
+  [K in RoutesMap<T>]: Reducer<
     T,
     Pipe<K, [Strings.Split<'/'>, Tuples.Drop<1>]>
   >;
 };
 
-export type ChildRoutes<T extends RouteJSON> = T extends WithRoutes
+export type ChildRoutes<T> = T extends WithRoutes
   ? Exclude<T['routes'], undefined>[keyof T['routes']]
   : never;
 
@@ -72,14 +81,14 @@ type GetShallowRoutesStrings<T, K> = Pipe<
 type RecursiveRouteStrings<T, K> = RecursiveRoutes<T> extends infer R
   ? R[keyof R] extends infer A
     ? A extends RouteJSON
-      ? RoutesStrings<A, `${K & string}/${keyof R & string}`>
+      ? RoutesMap<A, `${K & string}/${keyof R & string}`>
       : never
     : never
   : never;
 // #endregion
 
 // #region Type: RoutesStrings
-export type RoutesStrings<T, K = ''> =
+export type RoutesMap<T, K = ''> =
   | '/'
   | GetShallowRoutesStrings<T, K>
   | RecursiveRouteStrings<T, K>;

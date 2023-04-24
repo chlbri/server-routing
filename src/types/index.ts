@@ -1,53 +1,63 @@
 import type { Booleans, Objects, Pipe, Tuples } from 'hotscript';
 import type {
-  ChildRoutes,
   Config,
   Flat,
   IO,
   RouteJSON,
-  RoutesStrings,
+  RoutesMap,
+  _RouteJSON,
 } from './helpers';
 
+export type SimpleRouteJSON = _RouteJSON & {
+  routes?: Record<string, SimpleRouteJSON>;
+};
+
 // #region ExtractControllerStrings
-export type ExtractControllerStrings<T extends Config> =
-  Flat<T> extends Record<
-    string,
-    {
-      controller: infer K;
-    }
-  >
-    ? K
-    : never;
+export type ExtractControllerStrings<T extends Config> = Pipe<
+  Flat<T>,
+  [
+    Objects.PickBy<Booleans.Extends<{ controller: string }>>,
+    Objects.OmitBy<Booleans.Extends<{ controller?: undefined }>>,
+    Objects.Values,
+    Objects.Get<'controller'>,
+  ]
+>;
 // #endregion
 
 // #region ExtractMiddlewareStrings
-export type ExtractMiddlewareStrings<T extends Config> = T extends {
-  middleware?: infer Middleware;
-}
-  ?
-      | Middleware
-      | (ChildRoutes<T> extends Config
-          ? ExtractMiddlewareStrings<ChildRoutes<T>>
-          : never)
-  : never;
+export type ExtractMiddlewareStrings<T extends Config> = Pipe<
+  Flat<T>,
+  [
+    Objects.PickBy<Booleans.Extends<{ middleware: string }>>,
+    Objects.OmitBy<Booleans.Extends<{ middleware?: undefined }>>,
+    Objects.Values,
+    Objects.Get<'middleware'>,
+  ]
+>;
 // #endregion
 
 export type GetRoutesForController<T extends Config, K> = Pipe<
   Flat<T>,
-  [Objects.PickBy<Booleans.Extends<{ controller: K }>>]
+  [
+    Objects.PickBy<Booleans.Extends<{ controller: K }>>,
+    Objects.OmitBy<Booleans.Equals<never>>,
+  ]
 >;
 
 export type GetRoutesForMiddleware<T extends Config, K> = Pipe<
   Flat<T>,
-  [Objects.PickBy<Booleans.Extends<{ middleware: K }>>]
+  [
+    Objects.PickBy<Booleans.Extends<{ middleware: K }>>,
+    Objects.OmitBy<Booleans.Equals<never>>,
+  ]
 >;
 
 // #region ExtractTypesForController
 export type ExtractTypesForController<
   R extends Config,
-  TTypes extends Types<R>,
+  TTypes extends RouteTypes<R>,
   K,
-> = GetRoutesForController<R, K> extends infer A
+> = keyof GetRoutesForController<R, K> extends infer A
   ? A extends keyof TTypes
     ? TTypes[A]
     : never
@@ -57,28 +67,32 @@ export type ExtractTypesForController<
 // #region ExtractTypesForMiddleware
 export type ExtractTypesForMiddleware<
   R extends Config,
-  TTypes extends Types<R>,
+  TTypes extends RouteTypes<R>,
   K,
-> = GetRoutesForMiddleware<R, K> extends infer A
+> = keyof GetRoutesForMiddleware<R, K> extends infer A
   ? A extends keyof TTypes
     ? TTypes[A]
     : never
   : never;
 // #endregion
 
-export type Types<T extends RouteJSON> = Partial<
-  Record<RoutesStrings<T>, IO>
+export type RouteTypes<T extends RouteJSON> = Partial<
+  Record<RoutesMap<T>, IO>
+>;
+
+export type RoutesStrings<T extends Config> = Pipe<
+  Flat<T>,
+  [Objects.PickBy<Booleans.Extends<string>>, Objects.Values]
 >;
 
 // #region Options
-// TODO: Test it
-export type Options<
+export type RoutesOptions<
   Route extends Config,
-  TTypes extends Types<Route> = Types<Route>,
+  TTypes extends RouteTypes<Route> = RouteTypes<Route>,
 > = {
-  controllers: {
+  controllers?: {
     [key in ExtractControllerStrings<Route> &
-      string]: ExtractTypesForController<
+      string]?: ExtractTypesForController<
       Route,
       TTypes,
       key
@@ -86,7 +100,22 @@ export type Options<
       ? (input: Pipe<TT, [Tuples.At<0>]>) => Pipe<TT, [Tuples.At<1>]>
       : never;
   };
+
+  middlewares?: {
+    [key in ExtractMiddlewareStrings<Route> &
+      string]?: ExtractTypesForMiddleware<
+      Route,
+      TTypes,
+      key
+    > extends infer TT
+      ? (input: Pipe<TT, [Tuples.At<0>]>) => Pipe<TT, [Tuples.At<0>]>
+      : never;
+  };
+
+  routes?: {
+    [key in RoutesStrings<Route> & string]?: any;
+  };
 };
 // #endregion
 
-export type { RoutesStrings, Config };
+export type { RoutesMap, Config };

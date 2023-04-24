@@ -1,11 +1,11 @@
 import { expectType } from 'jest-tsd';
-import type { RoutesStrings } from './helpers';
+import type { RoutesMap } from './helpers';
 
 // #region Routes strings
 {
   // #region Simple, without nested routes
   {
-    type Actual = RoutesStrings<{
+    type Actual = RoutesMap<{
       controller: 'control';
       middleware: 'ret';
     }>;
@@ -18,7 +18,7 @@ import type { RoutesStrings } from './helpers';
 
   // #region With one nested routes
   {
-    type Actual = RoutesStrings<{
+    type Actual = RoutesMap<{
       controller: 'control';
       middleware: 'ret';
       output: 'output';
@@ -39,7 +39,7 @@ import type { RoutesStrings } from './helpers';
 
   // #region With many nested routes, but they have same controller
   {
-    type Actual = RoutesStrings<{
+    type Actual = RoutesMap<{
       controller: 'control';
       middleware: 'middleware';
       output: 'output';
@@ -104,7 +104,7 @@ import type { RoutesStrings } from './helpers';
       };
     };
 
-    type Actual = RoutesStrings<ActualTest>;
+    type Actual = RoutesMap<ActualTest>;
 
     type Expect =
       | '/'
