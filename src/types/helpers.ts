@@ -16,10 +16,13 @@ export type RouteJSON = Config | string;
 
 export type IO = [any, any];
 
+export type ControllerType = 'get' | 'post' | 'subscription';
+
 export type _RouteJSON = {
   types?: IO;
   controller: string;
   middleware?: string;
+  type?: ControllerType;
 };
 
 type Reducer<T extends Config, R extends readonly string[]> = Pipe<
@@ -93,4 +96,72 @@ export type RoutesMap<T, K = ''> =
   | GetShallowRoutesStrings<T, K>
   | RecursiveRouteStrings<T, K>;
 // #endregion
+// #endregion
+
+// #region ExtractControllerStrings
+export type ExtractControllerStrings<T extends Config> = Pipe<
+  Flat<T>,
+  [
+    Objects.PickBy<Booleans.Extends<{ controller: string }>>,
+    Objects.OmitBy<Booleans.Extends<{ controller?: undefined }>>,
+    Objects.Values,
+    Objects.Get<'controller'>,
+  ]
+>;
+// #endregion
+
+// #region ExtractMiddlewareStrings
+export type ExtractMiddlewareStrings<T extends Config> = Pipe<
+  Flat<T>,
+  [
+    Objects.PickBy<Booleans.Extends<{ middleware: string }>>,
+    Objects.OmitBy<Booleans.Extends<{ middleware?: undefined }>>,
+    Objects.Values,
+    Objects.Get<'middleware'>,
+  ]
+>;
+// #endregion
+
+export type GetRoutesForController<T extends Config, K> = Pipe<
+  Flat<T>,
+  [
+    Objects.PickBy<Booleans.Extends<{ controller: K }>>,
+    Objects.OmitBy<Booleans.Equals<never>>,
+  ]
+>;
+
+export type GetRoutesForMiddleware<T extends Config, K> = Pipe<
+  Flat<T>,
+  [
+    Objects.PickBy<Booleans.Extends<{ middleware: K }>>,
+    Objects.OmitBy<Booleans.Equals<never>>,
+  ]
+>;
+
+// #region ExtractTypesForController
+export type ExtractTypesForController<
+  R extends Config,
+  TTypes extends RouteTypes<R>,
+  K,
+> = keyof GetRoutesForController<R, K> extends infer A
+  ? A extends keyof TTypes
+    ? TTypes[A]
+    : never
+  : never;
+// #endregion
+
+export type RouteTypes<T extends RouteJSON> = Partial<
+  Record<RoutesMap<T>, IO>
+>;
+
+// #region ExtractTypesForMiddleware
+export type ExtractTypesForMiddleware<
+  R extends Config,
+  TTypes extends RouteTypes<R>,
+  K,
+> = keyof GetRoutesForMiddleware<R, K> extends infer A
+  ? A extends keyof TTypes
+    ? TTypes[A]
+    : never
+  : never;
 // #endregion

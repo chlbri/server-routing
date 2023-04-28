@@ -1,6 +1,5 @@
 module.exports = {
   transform: {
-    '^.+\\.(t|j)sx?$': ['@swc/jest'],
+    '^.+\\.(t|j)sx?$': '@swc/jest',
   },
-  modulePathIgnorePatterns: ['lib'],
 };
