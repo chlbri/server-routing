@@ -20,6 +20,7 @@
     "updateDependencies": "pnpm update --latest",
     "build": "rm -rf lib && pnpm run rollup",
     "test": "jest --passWithNoTests",
+    "test:reset": "watchman watch-del '/Users/chlbri/Documents/github/NODE JS/Libraries-bemedev/trpc-plus'",
     "test:watch": "pnpm run test --watchAll",
     "build:test": "pnpm run prepublishOnly && pnpm run test",
     "remove": "rm -rf node_modules pnpm-lock.yaml",
