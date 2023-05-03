@@ -1,3 +1,4 @@
+import { Parser } from '@trpc/server/dist/core/parser';
 import type { Booleans, Objects, Pipe, Tuples } from 'hotscript';
 import type {
   Config,
@@ -6,6 +7,7 @@ import type {
   ExtractTypesForController,
   ExtractTypesForMiddleware,
   Flat,
+  GetConfigContextP,
   RouteTypes,
   RoutesMap,
   _RouteJSON,
@@ -50,7 +52,7 @@ export type RoutesOptions<
   };
 
   routes?: {
-    [key in RoutesStrings<Route> & string]?: any;
+    [key in RoutesStrings<Route> & string]?: Flat<Config>;
   };
 };
 // #endregion

@@ -1,6 +1,6 @@
 import { expectType } from 'jest-tsd';
 
-import { EmptyObject } from './helpers';
+import { Config, EmptyObject, Flat } from './helpers';
 import type { RoutesOptions } from './index';
 
 // #region Options
@@ -196,6 +196,16 @@ import type { RoutesOptions } from './index';
     };
 
     type ActualTest = {
+      context: [
+        {
+          data?: {
+            id: string;
+            name: string;
+          };
+          opts: number;
+        },
+        number,
+      ];
       controller: 'control';
       middleware: 'middleware1';
       routes: {
@@ -229,8 +239,8 @@ import type { RoutesOptions } from './index';
         middleware2?: (input: number) => number;
       };
       routes?: {
-        routeStr?: any;
-        routeStr2?: any;
+        routeStr?: Flat<Config>;
+        routeStr2?: Flat<Config>;
       };
     };
 

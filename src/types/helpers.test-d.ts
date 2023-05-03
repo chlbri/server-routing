@@ -2,12 +2,13 @@ import { expectType } from 'jest-tsd';
 import type {
   ExtractControllerStrings,
   ExtractMiddlewareStrings,
+  GetConfigContextP,
   IO,
   RouteTypes,
   RoutesMap,
 } from './helpers';
 
-// #region Routes strings
+// #region RoutesMap
 {
   // #region Simple, without nested routes
   {
@@ -453,4 +454,61 @@ import type {
   }
   // #endregion
 }
+// #endregion
+
+// #region GetConfigContext
+
+// #region Simple, without nested elements
+{
+  type Actual = GetConfigContextP<{
+    controller: 'control';
+    context: string;
+  }>;
+
+  type Expect = string | undefined;
+
+  expectType<Expect>({} as Actual);
+}
+// #endregion
+
+// #region with nested elements
+{
+  type Actual = GetConfigContextP<{
+    controller: 'control';
+    context: { data?: string; id: number };
+  }>;
+
+  type Expect = { data?: string; id?: number } | undefined;
+
+  expectType<Expect>({} as Actual);
+}
+// #endregion
+
+// #region with deep nested elements
+{
+  type Actual = GetConfigContextP<{
+    controller: 'control';
+    context: {
+      data?: {
+        id: string;
+        name: string;
+      };
+      opts: number;
+    };
+  }>;
+
+  type Expect =
+    | {
+        data?: {
+          id?: string;
+          name?: string;
+        };
+        opts?: number;
+      }
+    | undefined;
+
+  expectType<Expect>({} as Actual);
+}
+// #endregion
+
 // #endregion
